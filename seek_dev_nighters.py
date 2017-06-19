@@ -1,7 +1,7 @@
 import requests
 import json
-from datetime import datetime
-
+import datetime as dt
+from itertools import product
 
 def load_attempts():
     pages = 10
@@ -14,24 +14,22 @@ def load_attempts():
 
 
 def get_users_info(content_list):
-    #for info in content_list['records']:
-    #    return {
-    #        'username': info['username'],
-    #        'timestamp': info['timestamp'],
-    #        'timezone':  info['timezone']
-    #    }
-    users_info_list=[{'username': info['username'], 'timestamp': info['timestamp'], 'timezone':  info['timezone']} for info in content_list['records']]
+    users_info_list=[{'username': info['username'],
+                      'timestamp': info['timestamp'],
+                      'timezone':  info['timezone']}
+                     for info in content_list['records']]
     return users_info_list
 
-def get_midnighters(timestamp):
-    for users in timestamp:
-        #print(users)
-        delivery_time = datetime.fromtimestamp(users['timestamp']).time()
-        print(delivery_time)
-        #return delivery_time
 
+def get_midnighters(users_info_list):
+    for user in users_info_list:
+        delivery_time = dt.datetime.fromtimestamp(user['timestamp']).time()
+        if delivery_time < dt.time(6, 0):
+            yield {'user':user['username'],'time':delivery_time}
+
+def print()
 
 if __name__ == '__main__':
     for content_list in load_attempts():
-        content=get_users_info(content_list)
-        get_midnighters(content)
+        for user in get_midnighters(get_users_info(content_list)):
+            print('User {user} sent work at {time}'.format(**user))
