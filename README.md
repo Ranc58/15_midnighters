@@ -2,7 +2,7 @@
 
 This program print out [DevMan](https://devman.org) students, who sent work after 12pm.
 
-#How to install
+# How to install
 1. Recomended use venv or virtualenv for better isolation.\
    Venv setup example: \
    `python3 -m venv myenv`\
@@ -10,7 +10,7 @@ This program print out [DevMan](https://devman.org) students, who sent work afte
 2. Install requirements: \
    `pip3 install -r requirements.txt` (alternatively try add `sudo` before command)
 
-#How to use
+# How to use
 
 You can use argument `-t` to specify end time. It must be in this 24h format: `Hours:Minutes`.\
 If you don't specify argument, program used default value for end time: 06:00.\
