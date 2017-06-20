@@ -1,5 +1,4 @@
 import requests
-import json
 import datetime as dt
 import argparse
 import pytz
@@ -25,7 +24,8 @@ def get_midnighters(content, end_time):
     delivery_time = dt.datetime.fromtimestamp(content['timestamp'],
                                               timezone).time()
     if delivery_time < end_time:
-        yield {'user': content['username'], 'time': delivery_time}
+        yield {'user': content['username'],
+               'time': delivery_time.strftime(FORMAT_TIME)}
 
 
 def print_midnighters(content, end_time):
