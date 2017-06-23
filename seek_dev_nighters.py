@@ -9,9 +9,9 @@ DEFAULT_TIME = '06:00'
 
 
 def load_attempts():
-    get_full_info = requests.get(URL_TEMPLATE).json()
-    pages_quantity = get_full_info['number_of_pages']
-    first_page_info = get_full_info['records']
+    full_page_info = requests.get(URL_TEMPLATE).json()
+    pages_quantity = full_page_info['number_of_pages']
+    first_page_info = full_page_info['records']
     for user_info in first_page_info:
         if user_info['timestamp']:
             yield user_info
