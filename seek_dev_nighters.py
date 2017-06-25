@@ -1,5 +1,4 @@
 import requests
-import json
 import datetime as dt
 import argparse
 import pytz
@@ -7,34 +6,36 @@ import pytz
 FORMAT_TIME = '%H:%M'
 URL_TEMPLATE = 'https://devman.org/api/challenges/solution_attempts/'
 DEFAULT_TIME = '06:00'
-PAGES = 10
-
-
-class Midnighter:
-    def __init__(self, content, end_time):
-        self.content = content
-        self.end_time = end_time
-
-    def get_midnighters(self):
-        timezone = pytz.timezone(self.content['timezone'])
-        delivery_time = dt.datetime.fromtimestamp(self.content['timestamp'],
-                                                  timezone).time()
-        if delivery_time < self.end_time:
-            yield {'user': self.content['username'], 'time': delivery_time}
-
-    def print_midnighters(self):
-        for user in Midnighter.get_midnighters(self):
-            print('User "{user}" sent work at {time}'.format(**user))
 
 
 def load_attempts():
-    for page in range(1, PAGES):
-        response = requests.get(URL_TEMPLATE,
-                                params={'page': page})
-        content_massive = response.json()['records']
-        for content in content_massive:
-            if content['timestamp']:
-                yield content
+    full_page_info = requests.get(URL_TEMPLATE).json()
+    pages_quantity = full_page_info['number_of_pages']
+    first_page_info = full_page_info['records']
+    for user_info in first_page_info:
+        if user_info['timestamp']:
+            yield user_info
+    for page in range(2, pages_quantity):
+        params = {'page': page}
+        user_info_massive = requests.get(URL_TEMPLATE,
+                                         params=params).json()
+        for user_info in user_info_massive['records']:
+            if user_info['timestamp']:
+                yield user_info
+
+
+def check_midnighter(user_info, end_time):
+    timezone = pytz.timezone(user_info['timezone'])
+    delivery_time = dt.datetime.fromtimestamp(user_info['timestamp'],
+                                              timezone).time()
+    if delivery_time < end_time:
+        yield {'user': user_info['username'],
+               'time': delivery_time.strftime(FORMAT_TIME)}
+
+
+def print_midnighters(user_info, end_time):
+    for user in check_midnighter(user_info, end_time):
+        print('User "{user}" sent work at {time}'.format(**user))
 
 
 def create_parser_for_user_arguments():
@@ -51,5 +52,5 @@ def create_parser_for_user_arguments():
 if __name__ == '__main__':
     namespace = create_parser_for_user_arguments()
     end_time = namespace.time
-    for content in load_attempts():
-        Midnighter(content, end_time).print_midnighters()
+    for user_info in load_attempts():
+        print_midnighters(user_info, end_time)
