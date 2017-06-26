@@ -1,5 +1,4 @@
 import requests
-import json
 import datetime as dt
 import argparse
 import pytz
@@ -7,7 +6,6 @@ import pytz
 FORMAT_TIME = '%H:%M'
 URL_TEMPLATE = 'https://devman.org/api/challenges/solution_attempts/'
 DEFAULT_TIME = '06:00'
-PAGES = 10
 
 
 class Midnighter:
@@ -28,13 +26,16 @@ class Midnighter:
 
 
 def load_attempts():
-    for page in range(1, PAGES):
-        response = requests.get(URL_TEMPLATE,
-                                params={'page': page})
-        content_massive = response.json()['records']
-        for content in content_massive:
-            if content['timestamp']:
-                yield content
+    current_page = 1
+    pages_for_parse = 1
+    while current_page <= pages_for_parse:
+        response = requests.get(URL_TEMPLATE, params={"page": current_page}).json()
+        pages_for_parse = response["number_of_pages"]
+        current_page += 1
+        for user_info in response["records"]:
+            if user_info['timestamp']:
+                yield user_info
+
 
 
 def create_parser_for_user_arguments():
